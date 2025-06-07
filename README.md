@@ -18,9 +18,7 @@
 ## 3. システムのインストール
 1. ソースコードをダウンロード:
 ```bash
-git clone https://[repository-url]/timecard-system.git
-または
-git clone git@github.com:Yossan-c4s/timecard-system
+git clone https://github.com/Yossan-c4s/timecard-system
 cd timecard-system
 ```
 
