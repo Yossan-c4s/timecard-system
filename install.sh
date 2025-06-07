@@ -9,7 +9,7 @@ echo "========================"
 # 必要なパッケージのインストール
 echo "Installing required packages..."
 sudo apt-get update
-sudo apt-get install -y python3-pip python3-yaml libusb-1.0-0-dev
+# sudo apt-get install -y python3-pip python3-yaml libusb-1.0-0-dev
 
 # Python パッケージのインストール
 echo "Installing Python packages..."
