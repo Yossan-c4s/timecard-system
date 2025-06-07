@@ -19,6 +19,8 @@
 1. ソースコードをダウンロード:
 ```bash
 git clone https://[repository-url]/timecard-system.git
+または
+git clone git@github.com:Yossan-c4s/timecard_felica_Rspi5
 cd timecard-system
 ```
 
