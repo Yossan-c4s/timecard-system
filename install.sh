@@ -13,7 +13,7 @@ sudo apt-get install -y python3-pip python3-yaml libusb-1.0-0-dev
 
 # Python パッケージのインストール
 echo "Installing Python packages..."
-sudo pip3 install nfcpy gspread oauth2client --break-system-packages
+# sudo pip3 install nfcpy gspread oauth2client --break-system-packages
 
 # アプリケーションディレクトリの作成
 sudo mkdir -p /opt/timecard/src
