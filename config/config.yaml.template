@@ -7,5 +7,5 @@ spreadsheet:
   sheet_name: "Timecard Records"
 
 audio:
-  entrance_sound: "/opt/timecard/sounds/entrance.wav"  # 入室時の音声ファイル
-  exit_sound: "/opt/timecard/sounds/exit.wav"         # 退室時の音声ファイル
+  entrance_sound: "/opt/timecard/sounds/entrance.wav"
+  exit_sound: "/opt/timecard/sounds/exit.wav"

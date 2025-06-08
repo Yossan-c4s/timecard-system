@@ -2,5 +2,4 @@ nfcpy==1.0.4
 gspread==5.10.0
 oauth2client==4.1.3
 pyyaml==6.0.1
-pytest==7.4.0
-pytest-cov==4.1.0
+pygame==2.5.1

@@ -40,6 +40,9 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# 現在のディレクトリのパスを取得
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # バックアップディレクトリの作成
 BACKUP_DIR="/opt/timecard/backup/$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
@@ -52,7 +55,8 @@ apt-get install -y \
     python3-yaml \
     libusb-1.0-0-dev \
     python3-dev \
-    build-essential
+    build-essential \
+    python3-pygame
 
 echo "Step 2: Creating Python virtual environment..."
 VENV_DIR="/opt/timecard/venv"
@@ -60,15 +64,13 @@ python3 -m venv "$VENV_DIR"
 
 echo "Step 3: Installing Python packages..."
 if [ $BREAK_SYSTEM_PACKAGES -eq 1 ]; then
-    echo "Installing packages with --break-system-packages flag..."
-    "$VENV_DIR/bin/pip3" install --break-system-packages nfcpy gspread oauth2client pyyaml
+    "$VENV_DIR/bin/pip3" install --break-system-packages -r "$SCRIPT_DIR/requirements.txt"
 else
-    echo "Installing packages in virtual environment..."
-    "$VENV_DIR/bin/pip3" install nfcpy gspread oauth2client pyyaml
+    "$VENV_DIR/bin/pip3" install -r "$SCRIPT_DIR/requirements.txt"
 fi
 
 echo "Step 4: Creating application directories..."
-mkdir -p /opt/timecard/src
+mkdir -p /opt/timecard/{src,sounds}
 mkdir -p /etc/timecard
 mkdir -p /var/log/timecard
 
@@ -80,10 +82,17 @@ if [ -d "/etc/timecard" ]; then
     cp -r /etc/timecard/* "$BACKUP_DIR/" 2>/dev/null || true
 fi
 
-echo "Step 6: Copying new files..."
-cp src/* /opt/timecard/src/
-cp config/config.yaml.template /etc/timecard/config.yaml
-cp config/nfc.rules /etc/udev/rules.d/99-nfc.rules
+echo "Step 6: Copying files..."
+# ソースファイルのコピー
+cp "$SCRIPT_DIR/src"/* /opt/timecard/src/
+
+# 設定ファイルのコピー
+cp "$SCRIPT_DIR/config/config.yaml.template" /etc/timecard/config.yaml
+cp "$SCRIPT_DIR/config/nfc.rules" /etc/udev/rules.d/99-nfc.rules
+
+# 音声ファイルのコピー
+cp "$SCRIPT_DIR/config/entrance.wav" /opt/timecard/sounds/
+cp "$SCRIPT_DIR/config/exit.wav" /opt/timecard/sounds/
 
 echo "Step 7: Creating Python wrapper script..."
 cat > /opt/timecard/src/timecard_wrapper.sh << 'EOF'
@@ -103,6 +112,8 @@ chown -R root:root /var/log/timecard
 chmod 755 /opt/timecard
 chmod 755 /etc/timecard
 chmod 755 /var/log/timecard
+chmod 755 /opt/timecard/sounds
+chmod 644 /opt/timecard/sounds/*.wav
 touch /var/log/timecard/timecard.log
 chmod 644 /var/log/timecard/timecard.log
 chmod 600 /etc/timecard/credentials.json || true
@@ -113,7 +124,23 @@ udevadm control --reload-rules
 udevadm trigger
 
 echo "Step 10: Setting up systemd service..."
-cp systemd/timecard.service /etc/systemd/system/
+cat > /etc/systemd/system/timecard.service << 'EOF'
+[Unit]
+Description=Timecard System Service
+After=network.target
+
+[Service]
+ExecStart=/opt/timecard/src/timecard_wrapper.sh
+WorkingDirectory=/opt/timecard
+User=root
+Group=root
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl daemon-reload
 systemctl enable timecard
 
@@ -121,8 +148,6 @@ echo "Installation completed successfully!"
 echo "Backup of previous installation (if any) is stored in: $BACKUP_DIR"
 echo ""
 echo "Next steps:"
-echo "1. Follow the README.md instructions to set up Google Cloud Platform"
-echo "2. Place your Google API credentials in /etc/timecard/credentials.json"
-echo "3. Set up the Google Spreadsheet with required sheets (Records, Users, Status)"
-echo "4. Update the configuration in /etc/timecard/config.yaml"
-echo "5. Start the service with: systemctl start timecard"
+echo "1. Place your Google API credentials in /etc/timecard/credentials.json"
+echo "2. Update the configuration in /etc/timecard/config.yaml if needed"
+echo "3. Start the service with: systemctl start timecard"
