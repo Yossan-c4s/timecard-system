@@ -1,7 +1,0 @@
-nfc:
-  entrance_port: "usb:0:0"
-  exit_port: "usb:1:0"
-
-spreadsheet:
-  credentials_path: "/etc/timecard/credentials.json"
-  sheet_name: "Timecard Records"
