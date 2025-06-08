@@ -1,5 +1,5 @@
 nfc:
-  port: "usb:1:3"  # NFCリーダーのポート番号
+  port: "usb:1:2"  # NFCリーダーのポート番号
   min_interval: 1.5  # 最小読み取り間隔（秒）
 
 spreadsheet:
