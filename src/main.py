@@ -36,23 +36,30 @@ class TimecardSystem:
 
     def run(self):
         logging.info("Starting Timecard System")
+        
         while True:
             try:
                 # 入室リーダーの監視
                 card_id = self.entrance_reader.read_card()
                 if card_id:
-                    self.spreadsheet.append_record(card_id, "入室")
+                    if self.spreadsheet.append_record(card_id, "入室"):
+                        logging.info(f"入室記録完了: {card_id}")
+                    else:
+                        logging.warning(f"入室記録失敗: {card_id}")
 
                 # 退室リーダーの監視
                 card_id = self.exit_reader.read_card()
                 if card_id:
-                    self.spreadsheet.append_record(card_id, "退室")
+                    if self.spreadsheet.append_record(card_id, "退室"):
+                        logging.info(f"退室記録完了: {card_id}")
+                    else:
+                        logging.warning(f"退室記録失敗: {card_id}")
 
-                time.sleep(0.1)
+                time.sleep(0.1)  # CPU負荷軽減
 
             except Exception as e:
                 logging.error(f"Error occurred: {e}")
-                time.sleep(1)
+                time.sleep(1)  # エラー時は待機時間を長めに
 
 if __name__ == "__main__":
     system = TimecardSystem()
