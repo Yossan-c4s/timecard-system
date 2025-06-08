@@ -20,6 +20,14 @@ class TimecardSystem:
     def __init__(self):
         with open('/etc/timecard/config.yaml', 'r') as f:
             self.config = yaml.safe_load(f)
+            
+        # オーディオ設定の初期化状態をログ出力
+        try:
+            with open('/proc/asound/cards', 'r') as f:
+                logging.info("Available audio devices:")
+                logging.info(f.read())
+        except Exception as e:
+            logging.warning(f"Could not read audio device info: {e}")
         
         self.spreadsheet = SpreadsheetManager(
             self.config['spreadsheet']['credentials_path'],
@@ -32,6 +40,8 @@ class TimecardSystem:
             'timecard',
             min_interval=1.5
         )
+
+        
         
         # 音声プレーヤーの初期化
         self.audio = AudioPlayer(self.config['audio'])
