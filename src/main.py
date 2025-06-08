@@ -25,13 +25,10 @@ class TimecardSystem:
             self.config['spreadsheet']['sheet_name']
         )
         
-        self.entrance_reader = NFCReader(
-            self.config['nfc']['entrance_port'],
-            'entrance'
-        )
-        self.exit_reader = NFCReader(
-            self.config['nfc']['exit_port'],
-            'exit'
+        # 1台のNFCリーダーを使用
+        self.reader = NFCReader(
+            self.config['nfc']['port'],
+            'timecard'
         )
 
     def run(self):
@@ -39,21 +36,13 @@ class TimecardSystem:
         
         while True:
             try:
-                # 入室リーダーの監視
-                card_id = self.entrance_reader.read_card()
+                # カードの読み取り
+                card_id = self.reader.read_card()
                 if card_id:
-                    if self.spreadsheet.process_entrance(card_id):
-                        logging.info(f"入室処理完了: {card_id}")
+                    if self.spreadsheet.process_card(card_id):
+                        logging.info(f"処理完了: {card_id}")
                     else:
-                        logging.warning(f"入室処理失敗: {card_id}")
-
-                # 退室リーダーの監視
-                card_id = self.exit_reader.read_card()
-                if card_id:
-                    if self.spreadsheet.process_exit(card_id):
-                        logging.info(f"退室処理完了: {card_id}")
-                    else:
-                        logging.warning(f"退室処理失敗: {card_id}")
+                        logging.warning(f"処理失敗: {card_id}")
 
                 time.sleep(0.1)
 
