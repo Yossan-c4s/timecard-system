@@ -85,10 +85,10 @@ cd timecard-system
 #### 4.2 インストールの実行
 ```bash
 # 通常インストール
-sudo ./install.sh
+sudo sh ./install.sh
 
 # または、パッケージの競合がある場合
-sudo ./install.sh --break-system-packages
+sudo sh ./install.sh --break-system-packages
 ```
 
 #### 4.3 認証情報の設定
