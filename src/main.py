@@ -42,24 +42,24 @@ class TimecardSystem:
                 # 入室リーダーの監視
                 card_id = self.entrance_reader.read_card()
                 if card_id:
-                    if self.spreadsheet.append_record(card_id, "入室"):
-                        logging.info(f"入室記録完了: {card_id}")
+                    if self.spreadsheet.process_entrance(card_id):
+                        logging.info(f"入室処理完了: {card_id}")
                     else:
-                        logging.warning(f"入室記録失敗: {card_id}")
+                        logging.warning(f"入室処理失敗: {card_id}")
 
                 # 退室リーダーの監視
                 card_id = self.exit_reader.read_card()
                 if card_id:
-                    if self.spreadsheet.append_record(card_id, "退室"):
-                        logging.info(f"退室記録完了: {card_id}")
+                    if self.spreadsheet.process_exit(card_id):
+                        logging.info(f"退室処理完了: {card_id}")
                     else:
-                        logging.warning(f"退室記録失敗: {card_id}")
+                        logging.warning(f"退室処理失敗: {card_id}")
 
-                time.sleep(0.1)  # CPU負荷軽減
+                time.sleep(0.1)
 
             except Exception as e:
                 logging.error(f"Error occurred: {e}")
-                time.sleep(1)  # エラー時は待機時間を長めに
+                time.sleep(1)
 
 if __name__ == "__main__":
     system = TimecardSystem()
