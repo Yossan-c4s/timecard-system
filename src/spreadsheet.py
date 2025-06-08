@@ -82,34 +82,18 @@ class SpreadsheetManager:
             logging.error(f"状態取得中にエラーが発生: {e}")
             return "退室"  # エラー時は退室状態とみなす
 
-    def process_entrance(self, card_id):
-        """入室処理"""
+    def process_card(self, card_id):
+        """カードの処理（状態を切り替え）"""
         try:
             current_status = self.get_status(card_id)
-            if current_status == "入室":
-                logging.info(f"既に入室済み: カードID {card_id}")
-                return False
+            # 現在の状態に応じて次の動作を決定
+            next_action = "入室" if current_status == "退室" else "退室"
             
-            # 入室記録と状態更新
-            return self._record_and_update_status(card_id, "入室")
-            
-        except Exception as e:
-            logging.error(f"入室処理中にエラーが発生: {e}")
-            return False
-
-    def process_exit(self, card_id):
-        """退室処理"""
-        try:
-            current_status = self.get_status(card_id)
-            if current_status == "退室":
-                logging.info(f"既に退室済み: カードID {card_id}")
-                return False
-            
-            # 退室記録と状態更新
-            return self._record_and_update_status(card_id, "退室")
+            # 記録と状態更新
+            return self._record_and_update_status(card_id, next_action)
             
         except Exception as e:
-            logging.error(f"退室処理中にエラーが発生: {e}")
+            logging.error(f"カード処理中にエラーが発生: {e}")
             return False
 
     def _record_and_update_status(self, card_id, action):
