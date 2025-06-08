@@ -46,7 +46,7 @@ class SpreadsheetManager:
                 self.user_sheet.append_row(users_headers)
             
             # Statusシートのヘッダー
-            status_headers = ['カードID', 'ユーザー名', '最終動作', '最終更新時刻']
+            status_headers = ['カードID', 'ユーザー名', '状態']
             if not self.status_sheet.row_values(1):
                 self.status_sheet.append_row(status_headers)
                 
@@ -72,44 +72,59 @@ class SpreadsheetManager:
             logging.error(f"ユーザー情報の取得中にエラーが発生: {e}")
             return None
 
-    def check_status(self, card_id, action):
-        """ユーザーの現在の入退室状態をチェック"""
+    def get_user_status(self, card_id):
+        """ユーザーの現在の入退室状態を取得"""
         try:
             cell = self.status_sheet.find(card_id)
             if cell and cell.col == 1:
-                current_status = self.status_sheet.row_values(cell.row)[2]  # 最終動作
-                # 同じ動作の重複を防ぐ
-                if current_status == action:
-                    return False
+                return self.status_sheet.row_values(cell.row)[2]  # 状態
+            return None
+        except Exception as e:
+            logging.error(f"ユーザー状態の取得中にエラーが発生: {e}")
+            return None
+
+    def update_user_status(self, card_id, action):
+        """ユーザーの状態を更新"""
+        try:
+            cell = self.status_sheet.find(card_id)
+            if cell and cell.col == 1:
                 # 状態を更新
                 self.status_sheet.update_cell(cell.row, 3, action)
-                self.status_sheet.update_cell(cell.row, 4, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                return True
             else:
                 # 新規ユーザーの状態を追加
                 user_info = self.get_user_info(card_id)
-                if user_info:
-                    self.status_sheet.append_row([
-                        card_id,
-                        user_info['user_name'],
-                        action,
-                        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    ])
-                return True
+                user_name = user_info['user_name'] if user_info else '未登録'
+                self.status_sheet.append_row([card_id, user_name, action])
         except Exception as e:
-            logging.error(f"状態チェック中にエラーが発生: {e}")
-            return True  # エラーの場合は記録を許可
+            logging.error(f"ユーザー状態の更新中にエラーが発生: {e}")
+            raise
+
+    def check_action_validity(self, card_id, action):
+        """アクションの有効性をチェック"""
+        current_status = self.get_user_status(card_id)
+        
+        if action == "入室":
+            # 現在の状態が入室中の場合は、再度の入室を許可しない
+            return current_status != "入室"
+        elif action == "退室":
+            # 現在の状態が退室中の場合は、再度の退室を許可しない
+            # また、入室していない人の退室も許可しない
+            return current_status == "入室"
+        
+        return False
 
     def append_record(self, card_id, action):
         """入退室記録の追加"""
         try:
-            if not self.check_status(card_id, action):
-                logging.info(f"重複する{action}のため記録をスキップ: {card_id}")
+            # アクションの有効性をチェック
+            if not self.check_action_validity(card_id, action):
+                logging.info(f"無効なアクション - カードID: {card_id}, アクション: {action}")
                 return False
                 
             now = datetime.now()
             user_info = self.get_user_info(card_id)
             
+            # 記録の追加
             if user_info:
                 self.record_sheet.append_row([
                     now.strftime('%Y-%m-%d'),
@@ -121,9 +136,7 @@ class SpreadsheetManager:
                     action
                 ])
                 logging.info(f"記録完了: {user_info['user_name']} ({card_id}) - {action}")
-                return True
             else:
-                # ユーザー情報が未登録の場合
                 self.record_sheet.append_row([
                     now.strftime('%Y-%m-%d'),
                     now.strftime('%H:%M:%S'),
@@ -134,7 +147,11 @@ class SpreadsheetManager:
                     action
                 ])
                 logging.warning(f"未登録のカード: {card_id}")
-                return True
+            
+            # 状態の更新
+            self.update_user_status(card_id, action)
+            return True
+            
         except Exception as e:
             logging.error(f"記録追加中にエラーが発生: {e}")
             return False
