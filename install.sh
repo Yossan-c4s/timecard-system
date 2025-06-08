@@ -56,7 +56,10 @@ apt-get install -y \
     libusb-1.0-0-dev \
     python3-dev \
     build-essential \
-    python3-pygame
+    python3-pygame \
+    alsa-utils \
+    pulseaudio \
+    pulseaudio-utils
 
 echo "Step 2: Creating Python virtual environment..."
 VENV_DIR="/opt/timecard/venv"
