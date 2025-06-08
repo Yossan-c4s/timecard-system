@@ -1,0 +1,14 @@
+[Unit]
+Description=Timecard System Service
+After=network.target
+
+[Service]
+ExecStart=/opt/timecard/src/timecard_wrapper.sh
+WorkingDirectory=/opt/timecard
+User=root
+Group=root
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
