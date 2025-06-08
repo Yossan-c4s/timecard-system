@@ -1,6 +1,5 @@
 nfc:
-  entrance_port: "usb:1:3"  # 入室用リーダーのポート
-  exit_port: "usb:1:4"     # 退室用リーダーのポート
+  port: "usb:1:3"  # NFCリーダーのポート番号
 
 spreadsheet:
   credentials_path: "/etc/timecard/credentials.json"
