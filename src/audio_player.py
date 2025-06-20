@@ -1,5 +1,5 @@
 import os
-os.environ['SDL_AUDIODRIVER'] = 'pulseaudio'  # ここをalsa→pulseaudioに
+os.environ['SDL_AUDIODRIVER'] = 'pulseaudio'
 import pygame
 import logging
 from pathlib import Path

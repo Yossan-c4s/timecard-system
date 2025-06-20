@@ -1,0 +1,15 @@
+.
+├── README.md
+├── install.sh
+├── requirements.txt
+├── tree.txt
+├── src
+│   ├── main.py
+│   ├── audio_player.py
+│   └── oled_display.py
+├── config
+│   ├── config.yaml.template
+│   ├── entrance.wav
+│   ├── exit.wav
+│   └── nfc.rules
+└── .gitignore

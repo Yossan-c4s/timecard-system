@@ -1,5 +1,7 @@
-nfcpy==1.0.4
-gspread==5.10.0
-oauth2client==4.1.3
-pyyaml==6.0.1
-pygame==2.5.1
+gspread
+oauth2client
+pyyaml
+pygame
+luma.oled
+pillow
+spidev
